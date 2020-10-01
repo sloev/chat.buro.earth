@@ -1,0 +1,26 @@
+version: "3.5"
+
+services:
+  api:
+    build:
+      context: .
+    environment:
+      - REDIS_HOST=keydb
+      - LOG_LEVEL=10
+    ports:
+      - "8000:8000"
+  keydb:
+    image: eqalpha/keydb
+    entrypoint: ["keydb-server"]
+    command:
+      [
+        "/etc/keydb/redis.conf",
+        "--port",
+        "6379",
+        "--protected-mode",
+        "no",
+        "--bind",
+        "0.0.0.0"
+      ]
+    ports:
+      - "6379:6379"
