@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="$chatburo_css_url">
+
+<img class="chatburo-img" 
+    style="width:$chatburo_width_px; height:$chatburo_height_px; background-size: $chatburo_width_px auto;" 
+    src="$chatburo_img_url">
+<br><br>
+<form action="$chatburo_post_url" method="post" target="$chatburo_target_name">
+    <label for="fusername">Username:</label><br><br>
+    <input 
+        type="text" id="fusername" name="username" maxlength="15" 
+        placeholder="max 15 ascii characters" autocomplete="off" required>
+    <br><br>
+    <label for="fmessage">Message:</label><br><br>
+    <input 
+        class="chatburo-message-field" type="text" id="fmessage" 
+        name="message" maxlength="140" placeholder="max 140 ascii characters (enter submits)" 
+        autocomplete="off" required>
+    <br><br>
+    <input type="submit" title="You can also press Enter" value="Submit message">
+</form>

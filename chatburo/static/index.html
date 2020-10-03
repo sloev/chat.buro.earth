@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ChatBuro</title>
+    <style>
+        body {
+            background-color:bisque;
+        }
+        h1 {
+            color:#ff70b8;
+            text-shadow: 2px 2px #a80093;
+        }
+        h2 {
+            color:#ff70b8;
+            text-shadow: 2px 2px #a80093;
+        }
+        h1 {
+            color:#ff70b8;
+            text-shadow: 2px 2px #a80093;
+        }
+        a, a:hover, a:visited {
+            color: #ff70b8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+       
+        .content {
+            background-color: #1f001b;
+            margin: 0 auto;
+            border-radius: 1em; 
+            padding: 1em;
+            max-width: 600px;
+            min-width: 320px;
+            margin-bottom: 50px;
+            line-height: 1em;
+            color: #94c98b;
+            font-family: "Comic Sans MS", cursive, sans-serif; 
+        }
+
+        .content div:not(:last-child) {
+            margin-bottom: 20px;
+        }
+        .support-button, .support-button:visited { 
+            display: inline-block; 
+            padding: 0.35em 1.2em; 
+            border: 0; 
+            margin: 0 0.3em 0.3em 0; 
+            border-radius: .5em; 
+            box-sizing: border-box; 
+            text-decoration: none; 
+            font-family: "Comic Sans MS", cursive, sans-serif; 
+            font-size: 14px;
+            font-weight: 300; color:#000000; 
+            text-align: center; 
+            transition: all 0.2s; 
+            background-color: #ffd000
+            } 
+            .support-button:hover { 
+                text-decoration: none;
+                color:#000000; 
+                background-color:#ff70b8; 
+                } 
+                @media all and (max-width:30em){ 
+                    .mybutton, input[type=submit]{ 
+                        margin:0.4em auto; 
+
+                        } 
+                        }
+
+        .mybutton, input[type=submit], .mybutton:visited { 
+            display: inline-block; 
+            padding: 0.35em 1.2em; 
+            border: 0.1em solid #FFFFFF; 
+            margin: 0 0.3em 0.3em 0; 
+            border-radius: 0.12em; 
+            box-sizing: border-box; 
+            text-decoration: none; 
+            font-family: "Comic Sans MS", cursive, sans-serif; 
+            font-size: 14px;
+            font-weight: 300; 
+            color:#FFFFFF; 
+            text-align: center; 
+            transition: all 0.2s; 
+            background-color: transparent
+            } 
+            .mybutton:hover, input[type=submit]:hover{ 
+                text-decoration: none;
+                color:#000000; 
+                background-color:#FFFFFF; 
+                } 
+                @media all and (max-width:30em){ 
+                    .mybutton, input[type=submit]{ 
+                        margin:0.4em auto; 
+
+                        } 
+                        }
+      
+        hr {
+            display: block;
+            height: 1px;
+            border: 0;
+            border-top: 1px solid #a80093;
+            margin: 1em 0;
+            padding: 0;
+        }
+        .reveal-if-active {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transform: scale(0.8);
+            transition: 0.5s;
+        }
+        input[type="checkbox"]:checked ~ .reveal-if-active {
+            opacity: 1;
+            max-height: 100px;
+            overflow: visible;
+            padding: 10px 20px;
+            transform: scale(1);
+        }
+
+        .created-form {
+            padding: 0 10px 0 10px;
+            background-color:beige;
+            color: #2b3b28;
+        }
+        .code {
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        }
+    </style>
+
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <span><a href="/"><h1>Chat Buro</h1></a></span>
+            <span><h3>Realtime pure-html chat</h1></span>
+        </div>
+        <div class="navbar">
+            <a class="mybutton" href="#snippet-form">Create snippet</a>
+            <a class="mybutton" href="#example">Example chat</a>
+            <a class="mybutton" href="#how-why">How and why?</a>
+            <a class="support-button" href="https://www.buymeacoffee.com/sloev" target="_blank">☕ Support me</a>
+            <hr/>
+        </div>
+        <div id="intro">
+            <p>
+                ChatBuro is created as a <b>free</b> solution to serve pure-html based chat boxes with no requirements else than the html chat snippet.
+            </p>
+            <p>
+                I made ChatBuro not only because i like the aesthetics of pure html/css but also because i think its amazing how far we went into the javascript rabbit hole when you can do so much without a single line of it, and i wanted to show that realtime web does not need to be complicated.
+            </p>
+            <p>
+                I wish you have a great time using ChatBuro, everything is <a href="https://www.github.com/sloev/chat.buro.earth" target="_blank">opensourced on github</a>. If you really like it a lot, <a href="https://www.buymeacoffee.com/sloev" target="_blank">consider donating</a>.
+            </p>
+            <p>
+                - <a href="https://www.github.com/sloev" target="_blank">sloev</a>
+            </p>
+        </div>
+        <br><br>
+        <div id="snippet-form">
+            <span><h2>Create chat snippet</h2></span>
+            <form action="$chatburo_new_form_url" method="POST" target="_self">
+                <input type="checkbox" name="supplied" value="supplied" class="aboveage2">Restrict incoming chat traffic?</input>
+                <div class="reveal-if-active">
+                    <label for="forigin">Set your chat snippet to only accept incoming messages from this domain:</label><br><br>
+                    <input type="text" id="forigin" maxlength="120" name="origin" autocomplete="off" placeholder="www.duckduckgo.com">
+                </div>
+                <label for="fwidth">Width:</label>
+                <input type="number" id="fwidth" min="0" max="600" name="width" autocomplete="off" value=350><br><br>
+                <label for="fheight">Height:</label>
+                <input type="number" id="fheight" min="0" max="600" name="height" autocomplete="off" value="500"><br><br>
+               <input type="submit" value="Create chat form"><a class="mybutton" href="/#snippet-form" style="display: $chatburo_created_clear_display;">Clear</a>
+            </form>
+            <div style="display: $chatburo_created_form_display;">
+                <h3>Your chat form:</h3>
+                <span>Copy it into the body of your page</span>
+            <div id="created-form" class="created-form">
+                <xmp class="code">
+$chatburo_created_form
+                </xmp>
+
+            </div>        
+        </div>
+    </div>
+    <br><br>
+        <div id="example">
+            <span><h2>Example chat</h2></span>
+            $chatburo_example_chat
+        </div>
+        <br><br>
+        <div id="how-why">
+            <span><h2>How and why?</h2></span>
+            <p>
+                Inspired by <a href="https://github.com/kkuchta/css-only-chat", target="_blank" target="_blank">css-only-chat</a> i wanted to create a simple but usable realtime chat element in pure html.
+            </p>
+            <p>
+                I learned that i could do <a href="https://underjord.io/live-server-push-without-js.html" target="_blank">server push with .mjpeg</a> which made think about using a simple html-form as user input and a motion-jpeg as live server pushed output.
+            </p>
+            <p>
+                To get around having to be redirected on server pushed i use a <i>target="charburo-worker"</i> on the form to always use the same tab/window as my form-post target.
+            </p>
+            <p>With all this i now had:</p>
+                <p>1. an img that shoed live info from the server</p>
+                <p>2. an input form for submitting messages myself</p>
+                <p>Next step was to create the backend for this, here i created a simple docker-compose POC based around python/sanic for web api and KeyDB (faster redis) for pubsub.
+            </p>
+            <p>
+                The last step was to figure out a way to make chatrooms that only responded to requests from a certain url, here i used <i>json web tokens</i> to embed a trusted origin into the hash of the chat url.
+            </p>
+        </div>
+</div>
+</body>
+</html>
