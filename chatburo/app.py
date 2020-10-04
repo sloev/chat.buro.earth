@@ -18,11 +18,11 @@ for css_filename, css_path in static.css_files.items():
     app.static(f"/static/{css_filename}", css_path, name=css_filename)
 
 EXAMPLE_CHAT = static.templates["chatform_html"].substitute(
-    chatburo_css_url=f"{settings.API_HOSTNAME}/static/{css_filename}",
+    chatburo_css_url=f"/static/{css_filename}",
     chatburo_width_px="320px",
     chatburo_height_px="400px",
-    chatburo_img_url=f"{settings.API_HOSTNAME}/{settings.EXAMPLE_CHAT_HASH}/image.mjpg",
-    chatburo_post_url=f"{settings.API_HOSTNAME}/{settings.EXAMPLE_CHAT_HASH}",
+    chatburo_img_url=f"/{settings.EXAMPLE_CHAT_HASH}/image.mjpg",
+    chatburo_post_url=f"/{settings.EXAMPLE_CHAT_HASH}",
     chatburo_target_name=settings.CHATBURO_TARGET_NAME,
 )
 
@@ -51,16 +51,16 @@ async def index(request):
     json_web_token = utils.encode(origin)
 
     new_form = static.templates["chatform_html"].substitute(
-        chatburo_css_url=f"{settings.API_HOSTNAME}/static/{css_filename}",
+        chatburo_css_url=f"/static/{css_filename}",
         chatburo_width_px=f"{width}px",
         chatburo_height_px=f"{height}px",
-        chatburo_img_url=f"{settings.API_HOSTNAME}/{json_web_token}/image.mjpg?width={width}&height={height}",
-        chatburo_post_url=f"{settings.API_HOSTNAME}/{json_web_token}",
+        chatburo_img_url=f"/{json_web_token}/image.mjpg?width={width}&height={height}",
+        chatburo_post_url=f"/{json_web_token}",
         chatburo_target_name=settings.CHATBURO_TARGET_NAME,
     )
     return html(
         static.templates["index_html"].substitute(
-            chatburo_new_form_url=f"{settings.API_HOSTNAME}/create#snippet-form",
+            chatburo_new_form_url=f"/create#snippet-form",
             chatburo_created_form_display="block",
             chatburo_created_form=new_form,
             chatburo_example_chat=EXAMPLE_CHAT,
@@ -73,7 +73,7 @@ async def index(request):
 async def index(request):
     return html(
         static.templates["index_html"].substitute(
-            chatburo_new_form_url=f"{settings.API_HOSTNAME}/create#snippet-form",
+            chatburo_new_form_url=f"/create#snippet-form",
             chatburo_created_form_display="none",
             chatburo_created_form="",
             chatburo_example_chat=EXAMPLE_CHAT,
