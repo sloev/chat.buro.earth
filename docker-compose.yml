@@ -8,7 +8,7 @@ services:
       - REDIS_HOST=keydb
       - LOG_LEVEL=10
     ports:
-      - "8000:8000"
+      - "9001:8000"
   keydb:
     image: eqalpha/keydb
     entrypoint: ["keydb-server"]
