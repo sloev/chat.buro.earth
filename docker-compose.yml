@@ -9,7 +9,9 @@ services:
       - LOG_LEVEL=10
     ports:
       - "9001:8000"
+    restart: always
   keydb:
+    restart: always
     image: eqalpha/keydb
     entrypoint: ["keydb-server"]
     command:
