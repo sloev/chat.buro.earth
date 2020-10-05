@@ -89,7 +89,7 @@ class SqliteBackedPubSub:
 
     async def subscribe(self, topic):
         current_date = get_current_datetime_string()
-
+        last_message = time.time()
         try:
             yield 0, None
             messages = deque()
@@ -150,10 +150,11 @@ class SqliteBackedPubSub:
                 while True:
                     try:
                         yield visitors, messages.pop()
+                        last_message = time.time()
                     except IndexError:
                         break
 
-                if got_message != got_message_last_time:
+                if got_message != got_message_last_time or time.time() >  last_message+10:
                     yield visitors, None
                     yield visitors, None
                 got_message_last_time = got_message
