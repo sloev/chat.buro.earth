@@ -12,5 +12,6 @@ RUN poetry install
 RUN convert -list font
 
 ADD chatburo/ chatburo/
+
 EXPOSE 8000
 CMD ["poetry", "run", "start"]

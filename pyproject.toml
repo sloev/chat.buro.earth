@@ -8,9 +8,10 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.7"
 sanic = "^20.9.0"
-asyncio_redis = "^0.16.0"
 trustpilot-json-logging = ">=1.0.12"
 PyJWT = "^1.7.1"
+aiosqlite = "^0.15.0"
+pillow = "^7.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

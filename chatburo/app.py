@@ -8,9 +8,8 @@ import time
 import io
 import asyncio
 from collections import defaultdict, deque
-import asyncio_redis
 import string
-from chatburo import settings, text_render, static, utils
+from chatburo import settings, rendering, static, utils, db
 from urllib.parse import urlparse
 
 app = Sanic("hello_example")
@@ -27,20 +26,21 @@ EXAMPLE_CHAT = static.templates["chatform_html"].substitute(
 )
 
 
+def is_ascii(s):
+    return all(ord(c) < 128 for c in s)
+
+
 @app.listener("before_server_start")
 async def setup_db(app, loop):
-    app.redis_connection = await asyncio_redis.Pool.create(
-        host=settings.REDIS_HOST, port=6379, poolsize=10
-    )
+    app.db = db.SqliteBackedPubSub()
+    app.rendering_pool = await rendering.AsyncTextWorkerPool().setup()
+    await app.db.connect(settings.SQLITE_DB_PATH)
 
 
 @app.listener("before_server_stop")
 async def notify_server_stopping(app, loop):
-    await app.redis_connection.close()
-
-
-def is_ascii(s):
-    return all(ord(c) < 128 for c in s)
+    await app.db.close()
+    app.rendering_pool.close()
 
 
 @app.route("/create", methods=["POST"])
@@ -84,80 +84,31 @@ async def index(request):
 
 @app.route("/<chat_id>", methods=["POST"])
 async def index(request, chat_id):
-    try:
-        request_origin = request.headers.get("origin")
-        origin = utils.decode(chat_id)
-        if origin:
-            if urlparse(request_origin).netloc != origin:
-                return text(
-                    "this domain is not authorized to post to this chat id", 401
-                )
+    request_origin = request.headers.get("origin")
+    origin = utils.decode(chat_id)
+    if origin:
+        if urlparse(request_origin).netloc != origin:
+            return text("this domain is not authorized to post to this chat id", 401)
 
-        username = request.form.get("username")
-        message = request.form.get("message")
-        if (
-            not username
-            or len(username) > 15
-            or not is_ascii(username)
-            or not message
-            or len(message) > 140
-            or not is_ascii(message)
-        ):
-            return text(
-                "wrong format: {username: {max_len:15, encoding:ascii}, message: {max_len:140, encoding:ascii} }",
-                400,
-            )
-
-        message = f"{username.rjust(16)} > {message}"
-
-        await request.app.redis_connection.set(
-            f"{chat_id}.{int(time.time()*1000.0)}", message, expire=60
+    username = request.form.get("username")
+    message = request.form.get("message")
+    if (
+        not username
+        or len(username) > 15
+        or not is_ascii(username)
+        or not message
+        or len(message) > 140
+        or not is_ascii(message)
+    ):
+        return text(
+            "wrong format: {username: {max_len:15, encoding:ascii}, message: {max_len:140, encoding:ascii} }",
+            400,
         )
 
-        await request.app.redis_connection.publish(chat_id, message)
-        return html(
-            """<body onload="window.open('', '_self', ''); window.close();"><h1>...loading</h1></body>"""
-        )
-    except asyncio_redis.Error as e:
-        logging.exception("Published failed")
-    # brug https://pypi.org/project/aiopubsub/
-    # sætter eller læser en cookie indeholdende uuid for client
-    # tager input og putter ind i kø
-    # processor tråd tager ud af kø og gemmer i under_construction
-    # processor går igennem under construction en gang imellem for at groome gamle ufærddigjorte beskeder væk
-    # processor putter hele binære (inkl frame) beskeder i outgoing når der er færdiggjorte
-    return text("error")
-
-
-async def topic_messages(redis_connection, chat_id):
-    cursor = await redis_connection.scan(match=f"{chat_id}.*")
-    while True:
-        key = await cursor.fetchone()
-        if key is None:
-            break
-        value = await redis_connection.get(key)
-        if value:
-            yield value
-
-    subscriber = await redis_connection.start_subscribe()
-    await subscriber.subscribe([chat_id])
-    try:
-        # Inside a while loop, wait for incoming events.
-        while True:
-            need_sleep = False
-            while need_sleep is False:
-                try:
-                    message = subscriber._messages_queue.get_nowait()
-                    yield message.value
-                except asyncio.QueueEmpty:
-                    need_sleep = True
-                    yield None
-            await asyncio.sleep(0.5)
-    except:
-        logging.exception("err")
-    finally:
-        logging.warning("exiting loop")
-        await subscriber.unsubscribe([chat_id])
+    await request.app.db.publish(chat_id, username, message)
+    return html(
+        """<body onload="window.open('', '_self', ''); window.close();"><h1>...loading</h1></body>"""
+    )
 
 
 @app.route("/<chat_id>/image.mjpg")
@@ -165,22 +116,21 @@ async def index(request, chat_id):
     width = int(request.args.get("width") or 320)
     height = int(request.args.get("height") or 400)
     if width < 50 or width > 600 or height < 50 or height > 600:
-        print(width, height)
         return text("dimensions need to be 50px to 600px", 400)
 
     async def streaming_fn(response):
-        last_10_messages = deque(maxlen=10)
-        async for message in topic_messages(request.app.redis_connection, chat_id):
+        last_10_messages = deque(maxlen=int(height / 16))
+        frame = None
+        async for visitors, message in request.app.db.subscribe(chat_id):
             if message is not None:
                 last_10_messages.append(message)
-                logging.warning(f"got message: {message}")
-            frame = await text_render.render(
-                last_10_messages, width=width, height=height
+            frame = await request.app.rendering_pool.messages_to_jpeg(
+                last_10_messages, width=width, height=height, visitors=visitors
             )
+
             await response.write(
                 b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
             )
-        logging.info("ending stream")
 
     return stream(
         streaming_fn,
@@ -194,7 +144,7 @@ async def index(request, chat_id):
 
 
 def run():
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8000, access_log=False)
 
 
 if __name__ == "__main__":
