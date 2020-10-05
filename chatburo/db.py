@@ -117,7 +117,7 @@ class SqliteBackedPubSub:
                 [topic],
             ) as cursor:
                 async for row in cursor:
-                    messages.appendleft(row[:2])
+                    messages.append(row[:2])
                     timestamp = row[2]
             got_message_last_time = True
             while True:
